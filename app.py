@@ -25,7 +25,6 @@ def chat():
     sentiment = TextBlob(translated_text).sentiment.polarity
 
     # 스코어 계산
-    score = 0
     if sentiment > 0:
         bot_response = "긍정 문장입니다."
         score = 1
@@ -34,6 +33,7 @@ def chat():
         score = -1
     else:
         bot_response = "중립 문장입니다."
+        score = 0
 
     # 이전 대화의 스코어 합산
     if chat_history:
@@ -56,4 +56,4 @@ def get_current_score():
     return 0
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
