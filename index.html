@@ -24,7 +24,14 @@
   <script>
     document.addEventListener("DOMContentLoaded", function() {
       // Sentiment 객체를 전역에서 생성
-      const sentiment = new Sentiment();
+      let sentiment;
+      try {
+        sentiment = new Sentiment();
+      } catch (error) {
+        console.error('Sentiment.js 라이브러리를 로드하는 데 실패했습니다.', error);
+        document.getElementById('errorMessage').textContent = 'Sentiment.js 라이브러리를 로드하는 데 실패했습니다.';
+        return;
+      }
 
       async function translateText() {
         const textInput = document.getElementById('textInput').value;
@@ -68,8 +75,8 @@
       }
 
       function analyzeSentiment(text) {
-        if (typeof Sentiment === 'undefined') {
-          console.error('Sentiment.js 라이브러리가 로드되지 않았습니다.');
+        if (!sentiment) {
+          console.error('Sentiment.js 객체가 정의되지 않았습니다.');
           return { sentiment: '오류', score: 0, subjectivity: '알 수 없음' };
         }
 
