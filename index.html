@@ -23,6 +23,12 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", function() {
+      if (typeof Sentiment === 'undefined') {
+        console.error('Sentiment 라이브러리가 로드되지 않았습니다.');
+        document.getElementById('errorMessage').textContent = 'Sentiment 라이브러리가 로드되지 않았습니다.';
+        return;
+      }
+
       const sentiment = new Sentiment(); // Sentiment 객체 생성
 
       async function translateText() {
