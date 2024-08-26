@@ -1,111 +1,147 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>개선된 번역 및 감정 분석 앱</title>
+    <title>챗봇</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f8f8;
+        }
+
+        #chat-container {
+            border: 1px solid #ccc;
+            background-color: #fff;
+            padding: 10px;
+            height: 300px;
+            overflow-y: scroll;
+        }
+
+        .message {
+            margin-bottom: 5px;
+        }
+
+        .user-message {
+            text-align: right;
+            font-weight: bold;
+            color: #337ab7;
+        }
+
+        .bot-message {
+            text-align: left;
+            font-weight: bold;
+            color: #555;
+        }
+
+        #score-container {
+            margin-top: 10px;
+            text-align: right;
+        }
+
+        #score-label {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        #score-value {
+            font-weight: bold;
+            color: #337ab7;
+        }
+
+        form {
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        input[type="text"] {
+            width: 400px;
+            height: 40px;
+            font-size: 16px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        input[type="submit"] {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #337ab7;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #warning-message {
+            margin-top: 10px;
+            text-align: center;
+            font-weight: bold;
+            color: red;
+        }
+    </style>
 </head>
 <body>
-  <div>
-    <h1>개선된 번역 및 감정 분석 앱</h1>
-    <div>
-      <label for="textInput">분석 및 번역할 한국어 텍스트 입력:</label>
-      <input type="text" id="textInput">
+    <h1>챗봇</h1>
+
+    <div id="score-container">
+        <span id="score-label">스코어:</span>
+        <span id="score-value">{{ score }}</span>
     </div>
-    <button id="translateButton">분석 및 번역</button>
-    <div id="translatedText"></div>
-    <div id="sentimentAnalysis"></div>
-    <div id="errorMessage"></div>
-  </div>
 
-  <!-- Load Sentiment.js from CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/sentiment@5.0.2/build/sentiment.min.js"></script>
+    <div id="chat-container">
+        {% for chat in chat_history %}
+            <div class="message">
+                {% if score <= -10 %}
+                    <div id="warning-message">
+                        경고: 스코어가 -10점 이하입니다!
+                    </div>
+                {% endif %}
+                {% if chat.user_input %}
+                    <p class="user-message">나: {{ chat.user_input }}</p>
+                {% endif %}
+                {% if chat.translated_input %}
+                    <p class="user-message">번역: {{ chat.translated_input }}</p>
+                {% endif %}
+                {% if chat.bot_response %}
+                    <p class="bot-message">챗봇: {{ chat.bot_response }}</p>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      let sentiment;
+    <form action="/chat" method="POST">
+        <input type="text" name="user_input" placeholder="문장을 입력하세요">
+        <br>
+        <input type="submit" value="전송">
+    </form>
 
-      // Sentiment 객체를 전역에서 생성
-      try {
-        sentiment = new Sentiment();
-      } catch (error) {
-        console.error('Sentiment.js 라이브러리를 로드하는 데 실패했습니다.', error);
-        document.getElementById('errorMessage').textContent = 'Sentiment.js 라이브러리를 로드하는 데 실패했습니다.';
-        return;
-      }
-
-      async function translateText() {
-        const textInput = document.getElementById('textInput').value;
-        const errorMessageElement = document.getElementById('errorMessage');
-        errorMessageElement.textContent = ''; // 이전 오류 메시지 초기화
-
-        if (!textInput.trim()) {
-          errorMessageElement.textContent = '텍스트를 입력해주세요.';
-          return;
+    <script>
+        function scrollChatContainer() {
+            var chatContainer = document.getElementById("chat-container");
+            chatContainer.scrollTop = chatContainer.scrollHeight;
         }
 
-        const url = 'https://google-translate1.p.rapidapi.com/language/translate/v2';
-        const options = {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-RapidAPI-Key': '3805e733dcmshObb5fc49895ecd3p177bcejsn76dea8ebcbc9',, // 실제 API 키로 대체하세요
-            'X-RapidAPI-Host': 'google-translate1.p.rapidapi.com'
-          },
-          body: `q=${encodeURIComponent(textInput)}&source=ko&target=en`
+        window.onload = function() {
+            scrollChatContainer();
+            showScore();
+            showWarningMessage();
+
         };
 
-        try {
-          const response = await fetch(url, options);
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const data = await response.json();
-          if (data.data && data.data.translations && data.data.translations[0]) {
-            const translatedText = data.data.translations[0].translatedText;
-            const sentimentData = analyzeSentiment(translatedText); // 번역된 텍스트에 대해 감정 분석
-            displayResults(translatedText, sentimentData);
-          } else {
-            throw new Error('번역 데이터를 받지 못했습니다.');
-          }
-        } catch (error) {
-          console.error('번역 오류:', error);
-          errorMessageElement.textContent = `오류 발생: ${error.message}. API 키를 확인하고 네트워크 연결을 확인해주세요.`;
-          displayResults('번역 중 오류가 발생했습니다', { sentiment: '오류', score: 0, subjectivity: '알 수 없음' });
+        function showScore() {
+            var scoreValue = "{{ score }}";
+            var scoreElement = document.getElementById("score-value");
+            scoreElement.innerHTML = scoreValue;
         }
-      }
+        function showWarningMessage() {
+            var scoreValue = "{{ score }}";
+            var warningMessageElement = document.getElementById("warning-message");
 
-      function analyzeSentiment(text) {
-        if (!sentiment) {
-          console.error('Sentiment.js 객체가 정의되지 않았습니다.');
-          return { sentiment: '오류', score: 0, subjectivity: '알 수 없음' };
+            if (scoreValue <= -10) {
+                warningMessageElement.style.display = "block";
+            } else {
+                warningMessageElement.style.display = "none";
+            }
         }
-
-        const result = sentiment.analyze(text);
-
-        // 감정 점수 계산 및 변환
-        const polarityPercentage = ((result.score + 5) / 10 * 100).toFixed(2);
-        const sentimentP = result.score > 0 ? "긍정적" : result.score < 0 ? "부정적" : "중립적";
-        const subjectivity = Math.abs(result.score) > 2 ? "주관적" : "객관적";
-
-        return {
-          sentiment: sentimentP,
-          score: polarityPercentage,
-          subjectivity: subjectivity
-        };
-      }
-
-      function displayResults(translatedText, sentimentData) {
-        document.getElementById('translatedText').innerHTML = `<strong>번역된 텍스트:</strong> ${translatedText}`;
-        document.getElementById('sentimentAnalysis').innerHTML = 
-          `<strong>감정 분석 결과:</strong><br>
-          감정: ${sentimentData.sentiment}<br>
-          점수: ${sentimentData.score}%<br>
-          주관성: ${sentimentData.subjectivity}`;
-      }
-
-      document.getElementById('translateButton').addEventListener('click', translateText);
-    });
-  </script>
+    </script>
 </body>
 </html>
