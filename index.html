@@ -1,17 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Translate and Sentiment Analysis App</title>
+  <title>번역 및 감정 분석 앱</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Malgun Gothic', sans-serif;
       margin: 0;
       padding: 0;
+      line-height: 1.6;
     }
     .container {
-      max-width: 600px;
+      max-width: 800px;
       margin: 50px auto;
       padding: 20px;
       border: 1px solid #ccc;
@@ -20,6 +21,7 @@
     }
     .heading {
       text-align: center;
+      color: #333;
     }
     .input-group {
       margin-bottom: 15px;
@@ -27,15 +29,16 @@
     .input-group label {
       display: block;
       margin-bottom: 5px;
+      font-weight: bold;
     }
     .input-group input {
       width: 100%;
-      padding: 8px;
+      padding: 10px;
       border: 1px solid #ccc;
       border-radius: 3px;
     }
     .input-group button {
-      padding: 8px 20px;
+      padding: 10px 20px;
       border: none;
       border-radius: 3px;
       background-color: #007bff;
@@ -44,7 +47,7 @@
     }
     .result {
       margin-top: 20px;
-      padding: 10px;
+      padding: 15px;
       border: 1px solid #ccc;
       border-radius: 3px;
       background-color: #fff;
@@ -53,19 +56,19 @@
 </head>
 <body>
   <div class="container">
-    <h1 class="heading">Translate and Sentiment Analysis App</h1>
+    <h1 class="heading">번역 및 감정 분석 앱</h1>
     <div class="input-group">
-      <label for="textInput">Enter text to analyze and translate:</label>
+      <label for="textInput">분석 및 번역할 텍스트 입력:</label>
       <input type="text" id="textInput">
     </div>
     <div class="input-group">
-      <button id="translateButton">Analyze and Translate</button>
+      <button id="translateButton">분석 및 번역</button>
     </div>
     <div id="translatedText" class="result"></div>
     <div id="sentimentAnalysis" class="result"></div>
   </div>
 
-  <!-- Load Sentiment.js from CDN -->
+  <!-- Sentiment.js 라이브러리 로드 -->
   <script src="https://cdn.jsdelivr.net/npm/sentiment@5.0.2/build/sentiment.min.js"></script>
 
   <script>
@@ -74,12 +77,17 @@
       const sourceLanguage = 'ko';
       const targetLanguage = 'en';
 
+      if (!textInput.trim()) {
+        alert('텍스트를 입력해주세요.');
+        return;
+      }
+
       const url = 'https://google-translate1.p.rapidapi.com/language/translate/v2';
       const options = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'X-RapidAPI-Key': '3805e733dcmsh0bb5fc49895ecd3p177bcejsn76dea8ebcbc9',
+          'X-RapidAPI-Key': 'YOUR_RAPIDAPI_KEY', // 여기에 실제 API 키를 입력하세요
           'X-RapidAPI-Host': 'google-translate1.p.rapidapi.com'
         },
         body: `q=${encodeURIComponent(textInput)}&source=${sourceLanguage}&target=${targetLanguage}`
@@ -87,26 +95,29 @@
 
       try {
         const response = await fetch(url, options);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const data = await response.json();
         const translatedText = data.data.translations[0].translatedText;
 
-        // Perform sentiment analysis on the original text
+        // 원본 텍스트에 대해 감정 분석 수행
         const sentimentData = analyzeSentiment(textInput);
 
         displayResults(translatedText, sentimentData);
       } catch (error) {
-        console.error('Translation error:', error);
-        displayResults('Error during translation', { sentiment: 'Error', score: 0 });
+        console.error('번역 오류:', error);
+        displayResults('번역 중 오류가 발생했습니다', { sentiment: '오류', score: 0, subjectivity: '알 수 없음' });
       }
     }
 
     function analyzeSentiment(text) {
-      var sentiment = new Sentiment();
-      var result = sentiment.analyze(text);
+      const sentiment = new Sentiment();
+      const result = sentiment.analyze(text);
 
-      var polarityPercentage = (result.score * 100).toFixed(2);
-      var sentimentP = result.score > 0 ? "긍정적" : result.score < 0 ? "부정적" : "중립적";
-      var subjectivity = result.score > 0 ? "주관적" : "객관적";
+      const polarityPercentage = ((result.score + 5) / 10 * 100).toFixed(2); // -5 ~ 5 범위를 0 ~ 100%로 변환
+      const sentimentP = result.score > 0 ? "긍정적" : result.score < 0 ? "부정적" : "중립적";
+      const subjectivity = Math.abs(result.score) > 2 ? "주관적" : "객관적";
 
       return {
         sentiment: sentimentP,
@@ -116,11 +127,11 @@
     }
 
     function displayResults(translatedText, sentimentData) {
-      document.getElementById('translatedText').textContent = `Translated Text: ${translatedText}`;
+      document.getElementById('translatedText').textContent = `번역된 텍스트: ${translatedText}`;
       document.getElementById('sentimentAnalysis').innerHTML = 
-        `<p>Sentiment: ${sentimentData.sentiment}</p>
-         <p>Score: ${sentimentData.score}%</p>
-         <p>Subjectivity: ${sentimentData.subjectivity}</p>`;
+        `<p>감정: ${sentimentData.sentiment}</p>
+         <p>점수: ${sentimentData.score}%</p>
+         <p>주관성: ${sentimentData.subjectivity}</p>`;
     }
 
     document.getElementById('translateButton').addEventListener('click', translateText);
