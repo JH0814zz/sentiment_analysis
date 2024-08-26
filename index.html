@@ -2,19 +2,34 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Korean to English Translation</title>
+    <title>Translation Web App</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
 </head>
 <body>
     <div class="container">
-        <h1>Korean to English Translation</h1>
-        <form id="translate-form">
+        <h1>Translation Web App</h1>
+        <form id="translate-form" enctype="multipart/form-data">
             <div class="form-group">
-                <label for="text-input">텍스트 입력 (Korean):</label>
-                <textarea id="text-input" name="text" class="form-control" rows="3" placeholder="여기에 한글 텍스트를 입력하세요"></textarea>
+                <label for="text-input">Text to Translate:</label>
+                <textarea id="text-input" name="text" class="form-control" rows="3"></textarea>
             </div>
-            <button type="submit" class="btn btn-primary">Translate to English</button>
+            <div class="form-group">
+                <label for="pdf-upload">Upload PDF:</label>
+                <input type="file" id="pdf-upload" name="pdf-upload" accept="application/pdf" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="language-input">Target Language:</label>
+                <select id="language-input" name="target_language" class="form-control">
+                    <option value="en">English</option>
+                    <option value="ko">Korean</option>
+                    <option value="es">Spanish</option>
+                    <option value="fr">French</option>
+                    <option value="de">German</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Translate</button>
+            <button type="button" id="record-button" class="btn btn-success">Record</button>
         </form>
         <div id="translation-result"></div>
     </div>
@@ -22,21 +37,52 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script>
         $(document).ready(function() {
+            var recognition = new webkitSpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = "";
+            $('#record-button').click(function() {
+                recognition.start();
+            });
+            recognition.onresult = function(event) {
+                var text = event.results[0][0].transcript;
+                $('#text-input').val(text);
+                recognition.lang = event.results[0][0].lang;
+            };
             $('#translate-form').submit(function(event) {
                 event.preventDefault();
-                var formData = {
-                    'text': $('#text-input').val()
-                };
+                var form_data = $(this).serialize();
                 $.ajax({
-                    url: '/translate', // 서버의 번역 처리 엔드포인트 URL
+                    url: '/translate',
                     type: 'POST',
                     contentType: 'application/json',
-                    data: JSON.stringify(formData),
+                    data: JSON.stringify({
+                        'text': $('#text-input').val(),
+                        'target_language': $('#language-input').val()
+                    }),
                     success: function(data) {
                         $('#translation-result').html('<p>' + data.translated_text + '</p>');
-                    },
-                    error: function() {
-                        $('#translation-result').html('<p>Error occurred while translating.</p>');
+                    }
+                });
+            });
+            $('#translate-form').submit(function(event) {
+                event.preventDefault();
+                var formData = new FormData(this);
+                $.ajax({
+                    url: '/translate',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function(data) {
+                        if (data.translated_text) {
+                            $('#translation-result').html('<p>' + data.translated_text + '</p>');
+                        } else if (data.translated_pdf_filename) {
+                            var download_link = '/temp/' + data.translated_pdf_filename;
+                            $('#translation-result').html('<a href="' + download_link + '">Download Translated PDF</a>');
+                        } else {
+                            $('#translation-result').html('<p>Error: ' + data.error + '</p>');
+                        }
                     }
                 });
             });
