@@ -71,6 +71,7 @@
             border-radius: 5px;
             cursor: pointer;
         }
+
         #warning-message {
             margin-top: 10px;
             text-align: center;
@@ -82,7 +83,7 @@
 <body>
     <h1>챗봇</h1>
 
-    <div id="score-container">
+    <div id="score-container" data-score="{{ score }}">
         <span id="score-label">스코어:</span>
         <span id="score-value">{{ score }}</span>
     </div>
@@ -90,11 +91,6 @@
     <div id="chat-container">
         {% for chat in chat_history %}
             <div class="message">
-                {% if score <= -10 %}
-                    <div id="warning-message">
-                        경고: 스코어가 -10점 이하입니다!
-                    </div>
-                {% endif %}
                 {% if chat.user_input %}
                     <p class="user-message">나: {{ chat.user_input }}</p>
                 {% endif %}
@@ -106,6 +102,11 @@
                 {% endif %}
             </div>
         {% endfor %}
+        {% if score <= -10 %}
+            <div id="warning-message">
+                경고: 스코어가 -10점 이하입니다!
+            </div>
+        {% endif %}
     </div>
 
     <form action="/chat" method="POST">
@@ -124,16 +125,18 @@
             scrollChatContainer();
             showScore();
             showWarningMessage();
-
         };
 
         function showScore() {
-            var scoreValue = "{{ score }}";
+            var scoreContainer = document.getElementById("score-container");
+            var scoreValue = scoreContainer.getAttribute("data-score");
             var scoreElement = document.getElementById("score-value");
             scoreElement.innerHTML = scoreValue;
         }
+
         function showWarningMessage() {
-            var scoreValue = "{{ score }}";
+            var scoreContainer = document.getElementById("score-container");
+            var scoreValue = parseInt(scoreContainer.getAttribute("data-score"), 10);
             var warningMessageElement = document.getElementById("warning-message");
 
             if (scoreValue <= -10) {
