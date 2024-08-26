@@ -66,6 +66,11 @@
       }
 
       function analyzeSentiment(text) {
+        if (typeof Sentiment === 'undefined') {
+          console.error('Sentiment.js 라이브러리가 로드되지 않았습니다.');
+          return { sentiment: '오류', score: 0, subjectivity: '알 수 없음' };
+        }
+
         const sentiment = new Sentiment();
         const result = sentiment.analyze(text);
 
