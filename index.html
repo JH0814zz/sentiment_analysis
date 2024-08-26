@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ㅇSentiment Analysis with Translation</title>
+    <title>Sentiment Analysis with Translation</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -40,7 +40,7 @@
 
     <script>
         async function analyzeSentiment() {
-            var text = document.getElementById("inputText").value;
+            const text = document.getElementById("inputText").value;
             if (text.trim() === "") {
                 alert("문장을 입력하세요.");
                 return;
@@ -65,17 +65,17 @@
                 }
 
                 const translationData = await translationResponse.json();
-                const translatedText = translationData.translatedText;
+                const translatedText = translationData.translations[0].text;
 
                 // Analyze sentiment of the translated text
-                var sentiment = new Sentiment();
-                var result = sentiment.analyze(translatedText);
+                const sentiment = new Sentiment();
+                const result = sentiment.analyze(translatedText);
 
-                var polarityPercentage = (result.score * 100).toFixed(2);
-                var sentimentP = result.score > 0 ? "긍정적" : result.score < 0 ? "부정적" : "중립적";
-                var subjectivity = result.score > 0 ? "주관적" : "객관적";
+                const polarityPercentage = (result.score * 100).toFixed(2);
+                const sentimentP = result.score > 0 ? "긍정적" : result.score < 0 ? "부정적" : "중립적";
+                const subjectivity = result.score > 0 ? "주관적" : "객관적";
 
-                var resultHtml = `
+                const resultHtml = `
                     <p>Polarity: ${polarityPercentage}% (${sentimentP})</p>
                     <p>Subjectivity: ${subjectivity}</p>
                     <p>해석: ${sentimentP === "긍정적" ? "긍정적입니다." : sentimentP === "부정적" ? "부정적입니다." : "중립적입니다."}</p>
