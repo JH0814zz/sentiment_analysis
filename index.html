@@ -46,8 +46,8 @@
                 return;
             }
 
-            // Translate text from Korean to English using LibreTranslate API
             try {
+                // Translate text from Korean to English using LibreTranslate API
                 const translationResponse = await fetch('https://libretranslate.de/translate', {
                     method: 'POST',
                     headers: {
