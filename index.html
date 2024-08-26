@@ -1,68 +1,88 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>감정 분석 및 번역</title>
+    <title>Sentiment Analysis with Translation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            box-sizing: border-box;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <h1>Sentiment Analysis with Translation</h1>
+        <textarea id="inputText" rows="4" placeholder="문장을 입력하세요..."></textarea>
+        <button onclick="analyzeSentiment()">Analyze</button>
+        <div id="result"></div>
+    </div>
 
-    <h1>감정 분석 및 번역</h1>
-    
-    <label for="text">긍정 / 부정, 객관 / 주관을 분석할 문장을 입력해주세요:</label>
-    <input type="text" id="text" name="text">
-    
-    <button onclick="analyzeSentiment()">분석</button>
+    <!-- Load Sentiment.js from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sentiment@5.0.2/build/sentiment.min.js"></script>
 
-    <p id="result"></p>
-
-    <script src="https://cdn.jsdelivr.net/npm/textblob.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@vitalets/google-translate-api@6.0.0/index.js"></script>
-    
     <script>
         async function analyzeSentiment() {
-            // 입력받은 텍스트 가져오기
-            const text_korean = document.getElementById('text').value;
-            
-            // 한국어를 영어로 번역
-            const translation = await translate(text_korean, {from: 'ko', to: 'en'});
-            const text = translation.text;
-            
-            // TextBlob 객체 생성 및 감정 분석
-            const blob = new TextBlob(text);
-            const sentiment = blob.sentiment();
-            
-            // 감정 분석 결과를 백분율로 변환
-            const polarity_percentage = (sentiment.polarity * 100).toFixed(2);
-            const subjectivity_percentage = (sentiment.subjectivity * 100).toFixed(2);
-            
-            let sentiment_p = "";
-            let sentiment_s = "";
-            
-            if (sentiment.polarity > 0) {
-                sentiment_p = "긍정적";
-            } else if (sentiment.polarity < 0) {
-                sentiment_p = "부정적";
-            } else {
-                sentiment_p = "중립적";
+            var text = document.getElementById("inputText").value;
+            if (text.trim() === "") {
+                alert("문장을 입력하세요.");
+                return;
             }
-            
-            if (sentiment.subjectivity > 0.5) {
-                sentiment_s = "주관적";
-            } else {
-                sentiment_s = "객관적";
+
+            // Translate text from Korean to English using LibreTranslate API
+            try {
+                const translationResponse = await fetch('https://libretranslate.de/translate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        q: text,
+                        source: 'ko',
+                        target: 'en',
+                    }),
+                });
+
+                const translationData = await translationResponse.json();
+                const translatedText = translationData.translatedText;
+
+                // Analyze sentiment of the translated text
+                var sentiment = new Sentiment();
+                var result = sentiment.analyze(translatedText);
+
+                var polarityPercentage = (result.score * 100).toFixed(2);
+                var sentimentP = result.score > 0 ? "긍정적" : result.score < 0 ? "부정적" : "중립적";
+                var subjectivity = result.score > 0 ? "주관적" : "객관적";
+
+                var resultHtml = `
+                    <p>Polarity: ${polarityPercentage}% (${sentimentP})</p>
+                    <p>Subjectivity: ${subjectivity}</p>
+                    <p>해석: ${sentimentP === "긍정적" ? "긍정적입니다." : sentimentP === "부정적" ? "부정적입니다." : "중립적입니다."}</p>
+                `;
+
+                document.getElementById("result").innerHTML = resultHtml;
+            } catch (error) {
+                console.error('Error:', error);
+                alert('번역 또는 감정 분석 중 오류가 발생했습니다.');
             }
-            
-            const sentiment_str = `감정: ${sentiment_p}, 주관성: ${sentiment_s}`;
-            
-            // 결과 출력
-            document.getElementById('result').innerHTML = `
-                Polarity: ${polarity_percentage}% (${sentiment_p})<br>
-                Subjectivity: ${subjectivity_percentage}% (${sentiment_s})<br>
-                해석: ${sentiment.polarity > 0 ? '긍정적입니다.' : sentiment.polarity < 0 ? '부정적입니다.' : '중립적입니다.'}
-            `;
         }
     </script>
-
 </body>
 </html>
