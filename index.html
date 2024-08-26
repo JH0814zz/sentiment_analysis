@@ -23,8 +23,7 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", function() {
-      // 감정 분석을 위한 Sentiment 객체 생성
-      const sentiment = new Sentiment();
+      const sentiment = new Sentiment(); // Sentiment 객체 생성
 
       async function translateText() {
         const textInput = document.getElementById('textInput').value;
@@ -70,10 +69,9 @@
       function analyzeSentiment(text) {
         const result = sentiment.analyze(text);
 
-        // 감정 점수 계산 및 변환
-        const polarityPercentage = ((result.score + 5) / 10 * 100).toFixed(2); // 점수 변환 (예: -5에서 +5로)
+        const polarityPercentage = ((result.score + 5) / 10 * 100).toFixed(2);
         const sentimentP = result.score > 0 ? "긍정적" : result.score < 0 ? "부정적" : "중립적";
-        const subjectivity = Math.abs(result.score) > 1 ? "주관적" : "객관적"; // 수정된 주관성 기준
+        const subjectivity = Math.abs(result.score) > 1 ? "주관적" : "객관적";
 
         return {
           sentiment: sentimentP,
