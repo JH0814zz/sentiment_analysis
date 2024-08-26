@@ -3,89 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sentiment Analysis with Translation</title>
+    <title>Sentiment Analysis</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sentiment/5.0.0/sentiment.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
         }
-        .container {
-            max-width: 600px;
-            margin: auto;
-        }
-        input, button {
+        textarea {
             width: 100%;
-            padding: 10px;
-            margin-top: 10px;
-            box-sizing: border-box;
+            height: 100px;
         }
-        #result {
-            margin-top: 20px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+        button {
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Sentiment Analysis with Translation</h1>
-        <textarea id="inputText" rows="4" placeholder="문장을 입력하세요..."></textarea>
-        <button onclick="analyzeSentiment()">Analyze</button>
-        <div id="result"></div>
-    </div>
-
-    <!-- Load Sentiment.js from CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/sentiment@5.0.2/build/sentiment.min.js"></script>
+    <h1>Sentiment Analysis</h1>
+    <textarea id="inputText" placeholder="문장을 입력하세요"></textarea><br>
+    <button onclick="analyzeSentiment()">분석하기</button>
+    <h2>분석 결과</h2>
+    <div id="result"></div>
 
     <script>
-        async function analyzeSentiment() {
-            const text = document.getElementById("inputText").value;
-            if (text.trim() === "") {
-                alert("문장을 입력하세요.");
+        function analyzeSentiment() {
+            const text = document.getElementById('inputText').value;
+            if (!text) {
+                alert('문장을 입력해주세요.');
                 return;
             }
 
-            try {
-                // Translate text from Korean to English using LibreTranslate API
-                const translationResponse = await fetch('https://libretranslate.de/translate', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        q: text,
-                        source: 'ko',
-                        target: 'en',
-                    }),
-                });
+            const sentiment = new Sentiment();
+            const result = sentiment.analyze(text);
 
-                if (!translationResponse.ok) {
-                    throw new Error('Translation API call failed');
-                }
+            const polarityPercentage = ((result.score / 100) * 100).toFixed(2); // Sentiment score is scaled
+            const sentimentStr = result.score > 0 ? '긍정적' : result.score < 0 ? '부정적' : '중립적';
 
-                const translationData = await translationResponse.json();
-                const translatedText = translationData.translations[0].text;
-
-                // Analyze sentiment of the translated text
-                const sentiment = new Sentiment();
-                const result = sentiment.analyze(translatedText);
-
-                const polarityPercentage = (result.score * 100).toFixed(2);
-                const sentimentP = result.score > 0 ? "긍정적" : result.score < 0 ? "부정적" : "중립적";
-                const subjectivity = result.score > 0 ? "주관적" : "객관적";
-
-                const resultHtml = `
-                    <p>Polarity: ${polarityPercentage}% (${sentimentP})</p>
-                    <p>Subjectivity: ${subjectivity}</p>
-                    <p>해석: ${sentimentP === "긍정적" ? "긍정적입니다." : sentimentP === "부정적" ? "부정적입니다." : "중립적입니다."}</p>
-                `;
-
-                document.getElementById("result").innerHTML = resultHtml;
-            } catch (error) {
-                console.error('Error:', error);
-                alert('번역 또는 감정 분석 중 오류가 발생했습니다.');
-            }
+            document.getElementById('result').innerHTML = `
+                Polarity: ${polarityPercentage}% (${sentimentStr})<br>
+                해석: ${sentimentStr === '중립적' ? '중립적입니다.' : (sentimentStr === '긍정적' ? '긍정적입니다.' : '부정적입니다.')}
+            `;
         }
     </script>
 </body>
