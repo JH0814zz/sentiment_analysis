@@ -35,11 +35,11 @@
       border-radius: 3px;
     }
     .input-group button {
-      padding: 8px 20px;
+      padding: 10px 20px;
       border: none;
       border-radius: 3px;
       background-color: #007bff;
-      color: #fff;
+      color: white;
       cursor: pointer;
     }
     .result {
@@ -47,51 +47,39 @@
       padding: 10px;
       border: 1px solid #ccc;
       border-radius: 3px;
-      background-color: #fff;
+      background-color: #f1f1f1;
     }
   </style>
 </head>
 <body>
+
   <div class="container">
     <h1 class="heading">Translate and Sentiment Analysis App</h1>
+
     <div class="input-group">
-      <label for="textInput">Enter text to analyze and translate:</label>
-      <input type="text" id="textInput">
+      <label for="inputText">Enter text to analyze and translate:</label>
+      <input type="text" id="inputText" placeholder="Enter text in Korean...">
     </div>
+
     <div class="input-group">
-      <button id="translateButton">Analyze and Translate</button>
+      <button onclick="analyzeAndTranslate()">Analyze and Translate</button>
     </div>
-    <div id="translatedText" class="result"></div>
-    <div id="sentimentAnalysis" class="result"></div>
+
+    <div id="result" class="result"></div>
   </div>
 
+  <!-- Load Sentiment.js from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/sentiment@5.0.2/build/sentiment.min.js"></script>
+
   <script>
-    async function analyzeSentiment(text) {
-      const url = 'https://api.example.com/sentiment-analysis'; // Replace with actual sentiment analysis API URL
-      const options = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-RapidAPI-Key': '3805e733dcmsh0bb5fc49895ecd3p177bcejsn76dea8ebcbc9',
-        },
-        body: JSON.stringify({ text })
-      };
-
-      try {
-        const response = await fetch(url, options);
-        const data = await response.json();
-        return data;
-      } catch (error) {
-        console.error('Sentiment analysis error:', error);
-        return { sentiment: 'Error', score: 0 };
+    async function analyzeAndTranslate() {
+      var text = document.getElementById("inputText").value;
+      if (text.trim() === "") {
+        alert("문장을 입력하세요.");
+        return;
       }
-    }
 
-    async function translateText() {
-      const textInput = document.getElementById('textInput').value;
-      const sourceLanguage = 'ko';
-      const targetLanguage = 'en';
-
+      // Translate text from Korean to English using the Google Translate API
       const url = 'https://google-translate1.p.rapidapi.com/language/translate/v2';
       const options = {
         method: 'POST',
@@ -100,7 +88,7 @@
           'X-RapidAPI-Key': '3805e733dcmsh0bb5fc49895ecd3p177bcejsn76dea8ebcbc9',
           'X-RapidAPI-Host': 'google-translate1.p.rapidapi.com'
         },
-        body: `q=${encodeURIComponent(textInput)}&source=${sourceLanguage}&target=${targetLanguage}`
+        body: `q=${encodeURIComponent(text)}&target=en&source=ko`
       };
 
       try {
@@ -108,23 +96,27 @@
         const data = await response.json();
         const translatedText = data.data.translations[0].translatedText;
 
-        // Perform sentiment analysis on the original text
-        const sentimentData = await analyzeSentiment(textInput);
+        // Perform sentiment analysis on the translated text
+        var sentiment = new Sentiment();
+        var result = sentiment.analyze(translatedText);
 
-        displayResults(translatedText, sentimentData);
+        var polarityPercentage = (result.score * 100).toFixed(2);
+        var sentimentP = result.score > 0 ? "긍정적" : result.score < 0 ? "부정적" : "중립적";
+        var subjectivity = result.score !== 0 ? "주관적" : "객관적";
+
+        var resultHtml = `
+          <p>Translated Text: ${translatedText}</p>
+          <p>Sentiment: ${sentimentP}, Score: ${polarityPercentage}%</p>
+          <p>Subjectivity: ${subjectivity}</p>
+        `;
+
+        document.getElementById("result").innerHTML = resultHtml;
       } catch (error) {
-        console.error('Translation error:', error);
-        displayResults('Error during translation', { sentiment: 'Error', score: 0 });
+        console.error("Error:", error);
+        document.getElementById("result").textContent = "Translation or Sentiment Analysis failed.";
       }
     }
-
-    function displayResults(translatedText, sentimentData) {
-      document.getElementById('translatedText').textContent = `Translated Text: ${translatedText}`;
-      document.getElementById('sentimentAnalysis').textContent = 
-        `Sentiment: ${sentimentData.sentiment}, Score: ${sentimentData.score}`;
-    }
-
-    document.getElementById('translateButton').addEventListener('click', translateText);
   </script>
+
 </body>
 </html>
