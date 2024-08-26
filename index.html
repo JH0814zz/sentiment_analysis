@@ -23,6 +23,8 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", function() {
+      // 감정 분석을 위한 Sentiment 객체 생성
+      const sentiment = new Sentiment();
 
       async function translateText() {
         const textInput = document.getElementById('textInput').value;
@@ -66,7 +68,6 @@
       }
 
       function analyzeSentiment(text) {
-        const sentiment = new Sentiment();
         const result = sentiment.analyze(text);
 
         // 감정 점수 계산 및 변환
