@@ -1,53 +1,46 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sentiment Analysis</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sentiment/5.0.0/sentiment.min.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        textarea {
-            width: 100%;
-            height: 100px;
-        }
-        button {
-            margin-top: 10px;
-        }
-    </style>
+    <title>Korean to English Translation</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
 </head>
 <body>
-    <h1>Sentiment Analysis</h1>
-    <textarea id="inputText" placeholder="문장을 입력하세요"></textarea><br>
-    <button onclick="analyzeSentiment()">분석하기</button>
-    <h2>분석 결과</h2>
-    <div id="result"></div>
-
+    <div class="container">
+        <h1>Korean to English Translation</h1>
+        <form id="translate-form">
+            <div class="form-group">
+                <label for="text-input">텍스트 입력 (Korean):</label>
+                <textarea id="text-input" name="text" class="form-control" rows="3" placeholder="여기에 한글 텍스트를 입력하세요"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Translate to English</button>
+        </form>
+        <div id="translation-result"></div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script>
-        function analyzeSentiment() {
-            const text = document.getElementById('inputText').value;
-            if (!text) {
-                alert('문장을 입력해주세요.');
-                return;
-            }
-
-            // Sentiment.js 인스턴스 생성
-            const sentiment = new Sentiment();
-            // 감정 분석 수행
-            const result = sentiment.analyze(text);
-            // 결과 처리
-            const score = result.score;
-            const sentimentStr = score > 0 ? '긍정적' : score < 0 ? '부정적' : '중립적';
-            const polarityPercentage = (Math.abs(score) * 100).toFixed(2);
-
-            document.getElementById('result').innerHTML = `
-                Polarity: ${polarityPercentage}% (${sentimentStr})<br>
-                해석: ${sentimentStr === '중립적' ? '중립적입니다.' : (sentimentStr === '긍정적' ? '긍정적입니다.' : '부정적입니다.')}
-            `;
-        }
+        $(document).ready(function() {
+            $('#translate-form').submit(function(event) {
+                event.preventDefault();
+                var formData = {
+                    'text': $('#text-input').val()
+                };
+                $.ajax({
+                    url: '/translate', // 서버의 번역 처리 엔드포인트 URL
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData),
+                    success: function(data) {
+                        $('#translation-result').html('<p>' + data.translated_text + '</p>');
+                    },
+                    error: function() {
+                        $('#translation-result').html('<p>Error occurred while translating.</p>');
+                    }
+                });
+            });
+        });
     </script>
 </body>
 </html>
