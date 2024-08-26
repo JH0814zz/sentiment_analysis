@@ -23,18 +23,12 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", function() {
-      if (typeof Sentiment === 'undefined') {
-        console.error('Sentiment 라이브러리가 로드되지 않았습니다.');
-        document.getElementById('errorMessage').textContent = 'Sentiment 라이브러리가 로드되지 않았습니다.';
-        return;
-      }
-
       const sentiment = new Sentiment(); // Sentiment 객체 생성
 
       async function translateText() {
         const textInput = document.getElementById('textInput').value;
         const errorMessageElement = document.getElementById('errorMessage');
-        errorMessageElement.textContent = ''; // 이전 오류 메시지 초기화
+        errorMessageElement.textContent = ''; // Clear previous error message
 
         if (!textInput.trim()) {
           errorMessageElement.textContent = '텍스트를 입력해주세요.';
