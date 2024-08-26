@@ -4,8 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>개선된 번역 및 감정 분석 앱</title>
-  <!-- Load Sentiment.js from CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/sentiment@5.0.2/build/sentiment.min.js"></script>
 </head>
 <body>
   <div>
@@ -20,21 +18,18 @@
     <div id="errorMessage"></div>
   </div>
 
+  <!-- Load Sentiment.js from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/sentiment@5.0.2/build/sentiment.min.js"></script>
+
   <script>
     document.addEventListener("DOMContentLoaded", function() {
-      // Check if Sentiment library is loaded
-      if (typeof Sentiment === 'undefined') {
-        console.error('Sentiment 라이브러리가 로드되지 않았습니다.');
-        document.getElementById('errorMessage').textContent = 'Sentiment 라이브러리가 로드되지 않았습니다.';
-        return;
-      }
-
-      const sentiment = new Sentiment(); // Create Sentiment object
+      // Sentiment 객체 생성
+      const sentiment = new Sentiment();
 
       async function translateText() {
         const textInput = document.getElementById('textInput').value;
         const errorMessageElement = document.getElementById('errorMessage');
-        errorMessageElement.textContent = ''; // Clear previous error message
+        errorMessageElement.textContent = ''; // 이전 오류 메시지 초기화
 
         if (!textInput.trim()) {
           errorMessageElement.textContent = '텍스트를 입력해주세요.';
@@ -46,7 +41,7 @@
           method: 'POST',
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            'X-RapidAPI-Key': 'YOUR_RAPIDAPI_KEY', // Replace with your RapidAPI key
+            'X-RapidAPI-Key': '3805e733dcmsh0bb5fc49895ecd3p177bcejsn76dea8ebcbc9',
             'X-RapidAPI-Host': 'google-translate1.p.rapidapi.com'
           },
           body: `q=${encodeURIComponent(textInput)}&source=ko&target=en`
@@ -60,7 +55,7 @@
           const data = await response.json();
           if (data.data && data.data.translations && data.data.translations[0]) {
             const translatedText = data.data.translations[0].translatedText;
-            const sentimentData = analyzeSentiment(textInput);
+            const sentimentData = analyzeSentiment(translatedText);
             displayResults(translatedText, sentimentData);
           } else {
             throw new Error('번역 데이터를 받지 못했습니다.');
@@ -73,11 +68,18 @@
       }
 
       function analyzeSentiment(text) {
+        if (typeof Sentiment === 'undefined') {
+          console.error('Sentiment.js 라이브러리가 로드되지 않았습니다.');
+          return { sentiment: '오류', score: 0, subjectivity: '알 수 없음' };
+        }
+
+        // Sentiment 객체를 함수 밖에서 생성하도록 변경
         const result = sentiment.analyze(text);
 
+        // 감정 점수 계산 및 변환
         const polarityPercentage = ((result.score + 5) / 10 * 100).toFixed(2);
         const sentimentP = result.score > 0 ? "긍정적" : result.score < 0 ? "부정적" : "중립적";
-        const subjectivity = Math.abs(result.score) > 1 ? "주관적" : "객관적";
+        const subjectivity = Math.abs(result.score) > 2 ? "주관적" : "객관적";
 
         return {
           sentiment: sentimentP,
