@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Translate App</title>
+  <title>Translate and Sentiment Analysis App</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -42,7 +42,7 @@
       color: #fff;
       cursor: pointer;
     }
-    .translated-text {
+    .result {
       margin-top: 20px;
       padding: 10px;
       border: 1px solid #ccc;
@@ -53,22 +53,44 @@
 </head>
 <body>
   <div class="container">
-    <h1 class="heading">Translate App</h1>
+    <h1 class="heading">Translate and Sentiment Analysis App</h1>
     <div class="input-group">
-      <label for="textInput">Enter text to translate:</label>
+      <label for="textInput">Enter text to analyze and translate:</label>
       <input type="text" id="textInput">
     </div>
     <div class="input-group">
-      <button id="translateButton">Translate</button>
+      <button id="translateButton">Analyze and Translate</button>
     </div>
-    <div id="translatedText" class="translated-text"></div>
+    <div id="translatedText" class="result"></div>
+    <div id="sentimentAnalysis" class="result"></div>
   </div>
 
   <script>
+    async function analyzeSentiment(text) {
+      const url = 'https://api.example.com/sentiment-analysis'; // Replace with actual sentiment analysis API URL
+      const options = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-RapidAPI-Key': '3805e733dcmsh0bb5fc49895ecd3p177bcejsn76dea8ebcbc9',
+        },
+        body: JSON.stringify({ text })
+      };
+
+      try {
+        const response = await fetch(url, options);
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error('Sentiment analysis error:', error);
+        return { sentiment: 'Error', score: 0 };
+      }
+    }
+
     async function translateText() {
       const textInput = document.getElementById('textInput').value;
-      const sourceLanguage = 'ko'; // 출발 언어 (한국어)
-      const targetLanguage = 'en'; // 도착 언어 (영어)
+      const sourceLanguage = 'ko';
+      const targetLanguage = 'en';
 
       const url = 'https://google-translate1.p.rapidapi.com/language/translate/v2';
       const options = {
@@ -84,15 +106,22 @@
       try {
         const response = await fetch(url, options);
         const data = await response.json();
-        displayTranslatedText(data.data.translations[0].translatedText);
+        const translatedText = data.data.translations[0].translatedText;
+
+        // Perform sentiment analysis on the original text
+        const sentimentData = await analyzeSentiment(textInput);
+
+        displayResults(translatedText, sentimentData);
       } catch (error) {
-        console.error(error);
+        console.error('Translation error:', error);
+        displayResults('Error during translation', { sentiment: 'Error', score: 0 });
       }
     }
 
-    function displayTranslatedText(translatedText) {
-      const translatedTextDiv = document.getElementById('translatedText');
-      translatedTextDiv.textContent = translatedText;
+    function displayResults(translatedText, sentimentData) {
+      document.getElementById('translatedText').textContent = `Translated Text: ${translatedText}`;
+      document.getElementById('sentimentAnalysis').textContent = 
+        `Sentiment: ${sentimentData.sentiment}, Score: ${sentimentData.score}`;
     }
 
     document.getElementById('translateButton').addEventListener('click', translateText);
