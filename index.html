@@ -60,6 +60,10 @@
                     }),
                 });
 
+                if (!translationResponse.ok) {
+                    throw new Error('Translation API call failed');
+                }
+
                 const translationData = await translationResponse.json();
                 const translatedText = translationData.translatedText;
 
