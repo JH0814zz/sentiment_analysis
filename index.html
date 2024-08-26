@@ -23,8 +23,9 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", function() {
-      // Sentiment 객체를 전역에서 생성
       let sentiment;
+
+      // Sentiment 객체를 전역에서 생성
       try {
         sentiment = new Sentiment();
       } catch (error) {
@@ -48,7 +49,7 @@
           method: 'POST',
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            'X-RapidAPI-Key': '3805e733dcmsh0bb5fc49895ecd3p177bcejsn76dea8ebcbc9',
+            'X-RapidAPI-Key': '3805e733dcmshObb5fc49895ecd3p177bcejsn76dea8ebcbc9',, // 실제 API 키로 대체하세요
             'X-RapidAPI-Host': 'google-translate1.p.rapidapi.com'
           },
           body: `q=${encodeURIComponent(textInput)}&source=ko&target=en`
