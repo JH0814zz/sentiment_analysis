@@ -74,6 +74,7 @@
         const sentiment = new Sentiment();
         const result = sentiment.analyze(text);
 
+        // 감정 점수 계산 및 변환
         const polarityPercentage = ((result.score + 5) / 10 * 100).toFixed(2);
         const sentimentP = result.score > 0 ? "긍정적" : result.score < 0 ? "부정적" : "중립적";
         const subjectivity = Math.abs(result.score) > 2 ? "주관적" : "객관적";
