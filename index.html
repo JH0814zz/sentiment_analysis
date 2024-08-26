@@ -80,6 +80,21 @@
   <script src="https://cdn.jsdelivr.net/npm/sentiment@5.0.2/build/sentiment.min.js"></script>
 
   <script>
+    function analyzeSentiment(text) {
+      const sentiment = new Sentiment();
+      const result = sentiment.analyze(text);
+
+      const polarityPercentage = ((result.score + 5) / 10 * 100).toFixed(2);
+      const sentimentP = result.score > 0 ? "긍정적" : result.score < 0 ? "부정적" : "중립적";
+      const subjectivity = Math.abs(result.score) > 2 ? "주관적" : "객관적";
+
+      return {
+        sentiment: sentimentP,
+        score: polarityPercentage,
+        subjectivity: subjectivity
+      };
+    }
+
     async function translateText() {
       const textInput = document.getElementById('textInput').value;
       const errorMessageElement = document.getElementById('errorMessage');
@@ -119,21 +134,6 @@
         errorMessageElement.textContent = `오류 발생: ${error.message}. API 키를 확인하고 네트워크 연결을 확인해주세요.`;
         displayResults('번역 중 오류가 발생했습니다', { sentiment: '오류', score: 0, subjectivity: '알 수 없음' });
       }
-    }
-
-    function analyzeSentiment(text) {
-      const sentiment = new Sentiment();
-      const result = sentiment.analyze(text);
-
-      const polarityPercentage = ((result.score + 5) / 10 * 100).toFixed(2);
-      const sentimentP = result.score > 0 ? "긍정적" : result.score < 0 ? "부정적" : "중립적";
-      const subjectivity = Math.abs(result.score) > 2 ? "주관적" : "객관적";
-
-      return {
-        sentiment: sentimentP,
-        score: polarityPercentage,
-        subjectivity: subjectivity
-      };
     }
 
     function displayResults(translatedText, sentimentData) {
