@@ -66,18 +66,13 @@
       }
 
       function analyzeSentiment(text) {
-        if (typeof Sentiment === 'undefined') {
-          console.error('Sentiment.js 라이브러리가 로드되지 않았습니다.');
-          return { sentiment: '오류', score: 0, subjectivity: '알 수 없음' };
-        }
-
         const sentiment = new Sentiment();
         const result = sentiment.analyze(text);
 
         // 감정 점수 계산 및 변환
-        const polarityPercentage = ((result.score + 5) / 10 * 100).toFixed(2);
+        const polarityPercentage = ((result.score + 5) / 10 * 100).toFixed(2); // 점수 변환 (예: -5에서 +5로)
         const sentimentP = result.score > 0 ? "긍정적" : result.score < 0 ? "부정적" : "중립적";
-        const subjectivity = Math.abs(result.score) > 2 ? "주관적" : "객관적";
+        const subjectivity = Math.abs(result.score) > 1 ? "주관적" : "객관적"; // 수정된 주관성 기준
 
         return {
           sentiment: sentimentP,
