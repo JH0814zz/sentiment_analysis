@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>개선된 번역 및 감정 분석 앱</title>
   <!-- Load Sentiment.js from CDN -->
-  <script src="https://unpkg.com/sentiment@5.0.2/build/sentiment.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sentiment@5.0.2/build/sentiment.min.js"></script>
 </head>
 <body>
   <div>
@@ -22,18 +22,19 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", function() {
+      // Check if Sentiment library is loaded
       if (typeof Sentiment === 'undefined') {
         console.error('Sentiment 라이브러리가 로드되지 않았습니다.');
         document.getElementById('errorMessage').textContent = 'Sentiment 라이브러리가 로드되지 않았습니다.';
         return;
       }
 
-      const sentiment = new Sentiment(); // Sentiment 객체 생성
+      const sentiment = new Sentiment(); // Create Sentiment object
 
       async function translateText() {
         const textInput = document.getElementById('textInput').value;
         const errorMessageElement = document.getElementById('errorMessage');
-        errorMessageElement.textContent = ''; // 이전 오류 메시지 초기화
+        errorMessageElement.textContent = ''; // Clear previous error message
 
         if (!textInput.trim()) {
           errorMessageElement.textContent = '텍스트를 입력해주세요.';
@@ -45,7 +46,7 @@
           method: 'POST',
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            'X-RapidAPI-Key': '3805e733dcmsh0bb5fc49895ecd3p177bcejsn76dea8ebcbc9',
+            'X-RapidAPI-Key': 'YOUR_RAPIDAPI_KEY', // Replace with your RapidAPI key
             'X-RapidAPI-Host': 'google-translate1.p.rapidapi.com'
           },
           body: `q=${encodeURIComponent(textInput)}&source=ko&target=en`
