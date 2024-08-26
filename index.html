@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>번역 및 감정 분석 앱</title>
+  <title>개선된 번역 및 감정 분석 앱</title>
   <style>
     body {
       font-family: 'Malgun Gothic', sans-serif;
@@ -57,11 +57,15 @@
       background-color: #e9f7ef;
       border-radius: 4px;
     }
+    .error {
+      color: #d32f2f;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>번역 및 감정 분석 앱</h1>
+    <h1>개선된 번역 및 감정 분석 앱</h1>
     <div class="input-group">
       <label for="textInput">분석 및 번역할 한국어 텍스트 입력:</label>
       <input type="text" id="textInput">
@@ -69,6 +73,7 @@
     <button id="translateButton">분석 및 번역</button>
     <div id="translatedText" class="result"></div>
     <div id="sentimentAnalysis" class="result"></div>
+    <div id="errorMessage" class="error"></div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/sentiment@5.0.2/build/sentiment.min.js"></script>
@@ -76,6 +81,14 @@
   <script>
     async function translateText() {
       const textInput = document.getElementById('textInput').value;
+      const errorMessageElement = document.getElementById('errorMessage');
+      errorMessageElement.textContent = ''; // 이전 오류 메시지 초기화
+
+      if (!textInput.trim()) {
+        errorMessageElement.textContent = '텍스트를 입력해주세요.';
+        return;
+      }
+
       const url = 'https://google-translate1.p.rapidapi.com/language/translate/v2';
       const options = {
         method: 'POST',
@@ -93,14 +106,16 @@
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        const translatedText = data.data.translations[0].translatedText;
-
-        // 감정 분석
-        const sentimentData = analyzeSentiment(textInput);
-
-        displayResults(translatedText, sentimentData);
+        if (data.data && data.data.translations && data.data.translations[0]) {
+          const translatedText = data.data.translations[0].translatedText;
+          const sentimentData = analyzeSentiment(textInput);
+          displayResults(translatedText, sentimentData);
+        } else {
+          throw new Error('번역 데이터를 받지 못했습니다.');
+        }
       } catch (error) {
         console.error('번역 오류:', error);
+        errorMessageElement.textContent = `오류 발생: ${error.message}. API 키를 확인하고 네트워크 연결을 확인해주세요.`;
         displayResults('번역 중 오류가 발생했습니다', { sentiment: '오류', score: 0, subjectivity: '알 수 없음' });
       }
     }
