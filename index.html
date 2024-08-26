@@ -3,81 +3,7 @@
 <head>
     <title>챗봇</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f8f8f8;
-        }
-
-        #chat-container {
-            border: 1px solid #ccc;
-            background-color: #fff;
-            padding: 10px;
-            height: 300px;
-            overflow-y: scroll;
-        }
-
-        .message {
-            margin-bottom: 5px;
-        }
-
-        .user-message {
-            text-align: right;
-            font-weight: bold;
-            color: #337ab7;
-        }
-
-        .bot-message {
-            text-align: left;
-            font-weight: bold;
-            color: #555;
-        }
-
-        #score-container {
-            margin-top: 10px;
-            text-align: right;
-        }
-
-        #score-label {
-            font-weight: bold;
-            margin-right: 5px;
-        }
-
-        #score-value {
-            font-weight: bold;
-            color: #337ab7;
-        }
-
-        form {
-            margin-top: 10px;
-            text-align: center;
-        }
-
-        input[type="text"] {
-            width: 400px;
-            height: 40px;
-            font-size: 16px;
-            padding: 5px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        input[type="submit"] {
-            margin-top: 10px;
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #337ab7;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        #warning-message {
-            margin-top: 10px;
-            text-align: center;
-            font-weight: bold;
-            color: red;
-        }
+        /* 스타일 코드 */
     </style>
 </head>
 <body>
@@ -116,35 +42,7 @@
     </form>
 
     <script>
-        function scrollChatContainer() {
-            var chatContainer = document.getElementById("chat-container");
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        }
-
-        window.onload = function() {
-            scrollChatContainer();
-            showScore();
-            showWarningMessage();
-        };
-
-        function showScore() {
-            var scoreContainer = document.getElementById("score-container");
-            var scoreValue = scoreContainer.getAttribute("data-score");
-            var scoreElement = document.getElementById("score-value");
-            scoreElement.innerHTML = scoreValue;
-        }
-
-        function showWarningMessage() {
-            var scoreContainer = document.getElementById("score-container");
-            var scoreValue = parseInt(scoreContainer.getAttribute("data-score"), 10);
-            var warningMessageElement = document.getElementById("warning-message");
-
-            if (scoreValue <= -10) {
-                warningMessageElement.style.display = "block";
-            } else {
-                warningMessageElement.style.display = "none";
-            }
-        }
+        // JavaScript 코드
     </script>
 </body>
 </html>
