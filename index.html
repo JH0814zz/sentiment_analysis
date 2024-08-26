@@ -23,7 +23,7 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", function() {
-      // Sentiment 객체 생성
+      // Sentiment 객체를 전역에서 생성
       const sentiment = new Sentiment();
 
       async function translateText() {
@@ -55,7 +55,7 @@
           const data = await response.json();
           if (data.data && data.data.translations && data.data.translations[0]) {
             const translatedText = data.data.translations[0].translatedText;
-            const sentimentData = analyzeSentiment(translatedText);
+            const sentimentData = analyzeSentiment(translatedText); // 번역된 텍스트에 대해 감정 분석
             displayResults(translatedText, sentimentData);
           } else {
             throw new Error('번역 데이터를 받지 못했습니다.');
@@ -73,7 +73,6 @@
           return { sentiment: '오류', score: 0, subjectivity: '알 수 없음' };
         }
 
-        // Sentiment 객체를 함수 밖에서 생성하도록 변경
         const result = sentiment.analyze(text);
 
         // 감정 점수 계산 및 변환
