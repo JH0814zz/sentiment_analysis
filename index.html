@@ -34,11 +34,14 @@
                 return;
             }
 
+            // Sentiment.js 인스턴스 생성
             const sentiment = new Sentiment();
+            // 감정 분석 수행
             const result = sentiment.analyze(text);
-
-            const polarityPercentage = ((result.score / 100) * 100).toFixed(2); // Sentiment score is scaled
-            const sentimentStr = result.score > 0 ? '긍정적' : result.score < 0 ? '부정적' : '중립적';
+            // 결과 처리
+            const score = result.score;
+            const sentimentStr = score > 0 ? '긍정적' : score < 0 ? '부정적' : '중립적';
+            const polarityPercentage = (Math.abs(score) * 100).toFixed(2);
 
             document.getElementById('result').innerHTML = `
                 Polarity: ${polarityPercentage}% (${sentimentStr})<br>
